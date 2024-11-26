@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import 'package:validator/core/utils/currency_mask.dart';
+import 'package:validator/core/utils/mask_input.dart';
 
 class Validators {
   TextInputType getKeyboardType(String? inputType) {
@@ -8,6 +10,7 @@ class Validators {
       case 'cep':
       case 'cpf':
       case 'money':
+      case 'int':
         return TextInputType.number;
       default:
         return TextInputType.text;
@@ -19,13 +22,19 @@ class Validators {
       case 'cep':
         return [
           FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(8)
+          LengthLimitingTextInputFormatter(8),
+          MaskInput(mask: '#####-###')
         ];
       case 'cpf':
         return [
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(11),
-          CPFMask(),
+          MaskInput(mask: '###.###.###-##'),
+        ];
+      case 'money':
+        return [
+          FilteringTextInputFormatter.digitsOnly,
+          CurrencyMask(symbol: 'R\$ ', decimal: '.', cents: ',')
         ];
       default:
         return [];
@@ -62,32 +71,5 @@ class Validators {
         break;
     }
     return null;
-  }
-}
-
-class CPFMask extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    var cpf = newValue.text;
-    if (cpf.length > 14) {
-      return oldValue;
-    }
-    cpf = cpf.replaceAll(r'\D', '');
-
-    var formatted = '';
-    for (var i = 0; i < cpf.length; i++) {
-      if ([3, 6, 9].contains(i)) {
-        formatted += i == 9 ? '-' : '.';
-      }
-      formatted += cpf[i];
-    }
-
-    return newValue.copyWith(
-      text: formatted,
-      selection: TextSelection.fromPosition(
-        TextPosition(offset: formatted.length),
-      ),
-    );
   }
 }

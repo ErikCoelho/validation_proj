@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
                 CustomTextField(
                     label: 'Número de dependentes',
                     hint: 'Preencha o número de dependentes',
-                    inputType: 'money',
+                    inputType: 'int',
                     onSaved: (value) => calculateUser = calculateUser.copyWith(
                         numeroDependentes: int.tryParse(value ?? ''))),
                 const SizedBox(height: 20),
@@ -92,7 +92,8 @@ class HomePage extends StatelessWidget {
                                   'Número de Dependentes: ${calculateUser.numeroDependentes}\n'
                                   'Outros Descontos: R\$ ${calculateUser.totalDescontoIRRF.toStringAsFixed(2)}\n'
                                   'Imposto de Renda (IRRF): R\$ ${irrf.toStringAsFixed(2)}\n'
-                                  'Salário Líquido: R\$ ${salarioLiquido.toStringAsFixed(2)}',
+                                  'Salário Líquido: R\$ ${salarioLiquido.toStringAsFixed(2)}\n'
+                                  'Endereço:',
                                 ),
                                 actions: [
                                   TextButton(
