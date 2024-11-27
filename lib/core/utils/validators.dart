@@ -22,14 +22,14 @@ class Validators {
       case 'cep':
         return [
           FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(8),
-          MaskInput(mask: '#####-###')
+          MaskInput(mask: '#####-###'),
+          LengthLimitingTextInputFormatter(9),
         ];
       case 'cpf':
         return [
           FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(11),
           MaskInput(mask: '###.###.###-##'),
+          LengthLimitingTextInputFormatter(14),
         ];
       case 'money':
         return [
@@ -54,12 +54,12 @@ class Validators {
         }
         break;
       case 'cep':
-        if (value.length != 8) {
+        if (value.length != 9) {
           return 'CEP deve conter 8 dígitos';
         }
         break;
       case 'cpf':
-        if (value.length != 11) {
+        if (value.length != 14) {
           return 'CPF deve conter 11 dígitos';
         }
       case 'nome':

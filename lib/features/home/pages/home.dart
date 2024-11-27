@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:validator/features/home/data/datasource/cep_api_service.dart';
+import 'package:validator/features/home/data/models/cep.dart';
 import 'package:validator/features/home/domain/usecases/calculate_user_usecases.dart';
 
 import '../../../core/models/calculate_user.dart';
@@ -11,6 +13,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
     var calculateUser = CalculateUser();
+    var cepApiService = CepApiService();
 
     return Scaffold(
       appBar: appBar(),
@@ -32,15 +35,27 @@ class HomePage extends StatelessWidget {
                     label: 'Salário Bruto',
                     hint: 'Preencha o salário',
                     inputType: 'money',
-                    onSaved: (value) => calculateUser = calculateUser.copyWith(
-                        salarioBruto: double.tryParse(value ?? ''))),
+                    onSaved: (value) {
+                      final sanitizedValue =
+                          value?.replaceAll(RegExp(r'[^0-9,]'), '') ?? '0';
+                      calculateUser = calculateUser.copyWith(
+                          salarioBruto: double.tryParse(
+                                  sanitizedValue.replaceAll(',', '.')) ??
+                              0);
+                    }),
                 const SizedBox(height: 20),
                 CustomTextField(
                     label: 'Desconto INSS',
                     hint: 'Preencha o desconto',
                     inputType: 'money',
-                    onSaved: (value) => calculateUser = calculateUser.copyWith(
-                        descontoINSS: double.tryParse(value ?? ''))),
+                    onSaved: (value) {
+                      final sanitizedValue =
+                          value?.replaceAll(RegExp(r'[^0-9,]'), '') ?? '0';
+                      calculateUser = calculateUser.copyWith(
+                          descontoINSS: double.tryParse(
+                                  sanitizedValue.replaceAll(',', '.')) ??
+                              0);
+                    }),
                 const SizedBox(height: 20),
                 CustomTextField(
                     label: 'Número de dependentes',
@@ -53,24 +68,43 @@ class HomePage extends StatelessWidget {
                     label: 'Total de descontos cabíveis para dedução de IRRF',
                     hint: 'Preencha o total de descontos',
                     inputType: 'money',
-                    onSaved: (value) => calculateUser = calculateUser.copyWith(
-                        totalDescontoIRRF: double.tryParse(value ?? ''))),
+                    onSaved: (value) {
+                      final sanitizedValue =
+                          value?.replaceAll(RegExp(r'[^0-9,]'), '') ?? '0';
+                      calculateUser = calculateUser.copyWith(
+                          totalDescontoIRRF: double.tryParse(
+                                  sanitizedValue.replaceAll(',', '.')) ??
+                              0);
+                    }),
                 const SizedBox(height: 20),
                 CustomTextField(
                     label: 'CPF',
                     hint: 'Preencha o cpf',
                     inputType: 'cpf',
-                    onSaved: (value) => calculateUser =
-                        calculateUser.copyWith(cpf: int.tryParse(value ?? ''))),
+                    onSaved: (value) {
+                      final sanitizedValue =
+                          value?.replaceAll(RegExp(r'[^0-9,]'), '') ?? '0';
+                      calculateUser = calculateUser.copyWith(
+                          cpf: int.tryParse(sanitizedValue
+                                  .replaceAll('.', '')
+                                  .replaceAll('-', '')) ??
+                              0);
+                    }),
                 const SizedBox(height: 20),
                 CustomTextField(
                     label: 'CEP',
                     hint: 'Preencha o cep',
                     inputType: 'cep',
-                    onSaved: (value) => calculateUser =
-                        calculateUser.copyWith(cep: int.tryParse(value ?? ''))),
+                    onSaved: (value) {
+                      final sanitizedValue =
+                          value?.replaceAll(RegExp(r'[^0-9,]'), '') ?? '0';
+                      calculateUser = calculateUser.copyWith(
+                          cep: int.tryParse(
+                                  sanitizedValue.replaceAll('-', '')) ??
+                              0);
+                    }),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (formKey.currentState!.validate()) {
                       formKey.currentState!.save();
 
@@ -80,6 +114,9 @@ class HomePage extends StatelessWidget {
                       final double irrf = calculateuserUsecases.calcularIRRF();
                       final double salarioLiquido =
                           calculateuserUsecases.calcularSalarioLiquido();
+
+                      var cep = await cepApiService
+                          .getCep(calculateUser.cep.toString());
 
                       showDialog(
                           context: context,
@@ -93,7 +130,7 @@ class HomePage extends StatelessWidget {
                                   'Outros Descontos: R\$ ${calculateUser.totalDescontoIRRF.toStringAsFixed(2)}\n'
                                   'Imposto de Renda (IRRF): R\$ ${irrf.toStringAsFixed(2)}\n'
                                   'Salário Líquido: R\$ ${salarioLiquido.toStringAsFixed(2)}\n'
-                                  'Endereço:',
+                                  'Endereço: ${cep.logradouro}, ${cep.bairro}, ${cep.localidade} - ${cep.uf}',
                                 ),
                                 actions: [
                                   TextButton(
